@@ -96,7 +96,7 @@ private fun AppRoot(app: App) {
 
                 1 -> {
                     val vm: ScannerViewModel = viewModel(
-                        factory = ScannerViewModel.Factory(app.scanOrchestrator, app.signalNotifier),
+                        factory = ScannerViewModel.Factory(app.scanOrchestrator, app.signalNotifier, app.settingsRepository),
                     )
                     ScannerScreen(vm)
                 }
@@ -110,7 +110,7 @@ private fun AppRoot(app: App) {
 
                 else -> {
                     val vm: SettingsViewModel = viewModel(
-                        factory = SettingsViewModel.Factory(app.workerScheduler),
+                        factory = SettingsViewModel.Factory(app.settingsRepository, app.workerScheduler),
                     )
                     SettingsScreen(vm)
                 }
