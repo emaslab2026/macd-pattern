@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.yourname.macdscanner.App
-import com.yourname.macdscanner.core.model.Timeframe
 
 class PeriodicScanWorker(
     appContext: Context,
@@ -12,8 +11,11 @@ class PeriodicScanWorker(
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
         val app = applicationContext as App
-        val signals = app.scanOrchestrator.run(Timeframe.H1, System.currentTimeMillis())
-        app.signalNotifier.notifySignals(signals)
+        val settings = app.settingsRepository.getSettings()
+        val signals = app.scanOrchestrator.run(settings.timeframe, System.currentTimeMillis())
+        if (settings.notificationsEnabled) {
+            app.signalNotifier.notifySignals(signals)
+        }
         return Result.success()
     }
 

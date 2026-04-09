@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.yourname.macdscanner.core.indicator.MacdCalculator
 import com.yourname.macdscanner.core.pattern.MacdPatternDetector
 import com.yourname.macdscanner.data.local.AppDatabase
+import com.yourname.macdscanner.data.local.DatabaseMigrations
 import com.yourname.macdscanner.data.repository.CandleRepository
+import com.yourname.macdscanner.data.repository.SettingsRepository
 import com.yourname.macdscanner.data.repository.SignalRepository
 import com.yourname.macdscanner.data.repository.WatchlistRepository
 import com.yourname.macdscanner.data.source.MockOhlcvDataSource
@@ -14,15 +16,24 @@ import com.yourname.macdscanner.notification.SignalNotifier
 import com.yourname.macdscanner.scan.ScanOrchestrator
 import com.yourname.macdscanner.scan.ScanUseCase
 import com.yourname.macdscanner.worker.WorkerScheduler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class App : Application() {
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     val db: AppDatabase by lazy {
-        Room.databaseBuilder(this, AppDatabase::class.java, "macd_scanner.db").build()
+        Room.databaseBuilder(this, AppDatabase::class.java, "macd_scanner.db")
+            .addMigrations(DatabaseMigrations.MIGRATION_1_2)
+            .build()
     }
 
     val watchlistRepository by lazy { WatchlistRepository(db.watchlistDao()) }
     val candleRepository by lazy { CandleRepository(db.candleDao(), MockOhlcvDataSource()) }
     val signalRepository by lazy { SignalRepository(db.signalDao()) }
+    val settingsRepository by lazy { SettingsRepository(db.settingsDao()) }
 
     private val macdCalculator by lazy { MacdCalculator() }
     private val detector by lazy { MacdPatternDetector() }
@@ -38,6 +49,11 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationChannels.create(this)
-        workerScheduler.schedulePeriodicScan(15)
+
+        appScope.launch {
+            settingsRepository.ensureDefault(System.currentTimeMillis())
+            val interval = settingsRepository.getSettings().scanIntervalMinutes
+            workerScheduler.schedulePeriodicScan(interval)
+        }
     }
 }

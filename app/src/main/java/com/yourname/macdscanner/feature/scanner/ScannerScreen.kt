@@ -22,6 +22,7 @@ fun ScannerScreen(viewModel: ScannerViewModel) {
     val status by viewModel.status.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Global timeframe")
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Timeframe.entries.forEach { tf ->
                 FilterChip(
