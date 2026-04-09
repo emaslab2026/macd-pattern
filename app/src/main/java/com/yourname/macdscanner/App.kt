@@ -26,7 +26,7 @@ class App : Application() {
 
     val db: AppDatabase by lazy {
         Room.databaseBuilder(this, AppDatabase::class.java, "macd_scanner.db")
-            .addMigrations(DatabaseMigrations.MIGRATION_1_2)
+            .fallbackToDestructiveMigration()
             .build()
     }
 

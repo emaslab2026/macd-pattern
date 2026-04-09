@@ -8,9 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class SettingsRepository(private val dao: SettingsDao) {
-    companion object {
-        private const val MIN_SCAN_INTERVAL_MINUTES = 15L
-    }
     fun observeSettings(): Flow<AppSettings> =
         dao.observeSettings().map { it?.toDomain() ?: AppSettings.DEFAULT }
 
@@ -23,8 +20,7 @@ class SettingsRepository(private val dao: SettingsDao) {
 
     suspend fun updateScanInterval(minutes: Long, now: Long) {
         val current = dao.getSettings()?.toDomain() ?: AppSettings.DEFAULT
-        val safeMinutes = minutes.coerceAtLeast(MIN_SCAN_INTERVAL_MINUTES)
-        dao.upsert(current.copy(scanIntervalMinutes = safeMinutes).toEntity(now))
+        dao.upsert(current.copy(scanIntervalMinutes = minutes).toEntity(now))
     }
 
     suspend fun ensureDefault(now: Long) {
