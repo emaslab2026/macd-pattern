@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.yourname.macdscanner.core.indicator.MacdCalculator
 import com.yourname.macdscanner.core.pattern.MacdPatternDetector
 import com.yourname.macdscanner.data.local.AppDatabase
+import com.yourname.macdscanner.data.local.DatabaseMigrations
 import com.yourname.macdscanner.data.repository.CandleRepository
 import com.yourname.macdscanner.data.repository.SettingsRepository
 import com.yourname.macdscanner.data.repository.SignalRepository
